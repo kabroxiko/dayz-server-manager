@@ -1,0 +1,28 @@
+{
+    "admins": [{
+        "userId": "admin",
+        "userLevel": "admin",
+        "password": "admin123"
+    }],
+    "webPort": 3000,
+    "discordBotToken": "",
+    "serverPath": "",
+    "steamCmdPath": "",
+    "events": [],
+    "metricPollIntervall": 5000,
+    "hooks": [],
+    "ingameReportEnabled": false,
+    "ingameApiKey": "temp-api-key",
+    "rconPassword": "temp-rcon-password",
+    "backupPath": "",
+    "serverCfg": {
+        "hostname": "DayZ Server Manager",
+        "maxPlayers": 60,
+        "passwordAdmin": "admin123",
+        "motd": [],
+        "motdInterval": 30,
+        "verifySignatures": 2,
+        "instanceId": 1,
+        "Missions": {}
+    }
+}

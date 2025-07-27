@@ -1,0 +1,130 @@
+{
+    "definitions": {
+        "ServerCfg": {
+            "properties": {
+                "hostname": {
+                    "type": "string",
+                    "description": "Server name displayed in the server browser",
+                    "default": "DayZ Server"
+                },
+                "password": {
+                    "type": "string",
+                    "description": "Password required to join the server",
+                    "default": ""
+                },
+                "passwordAdmin": {
+                    "type": "string",
+                    "description": "Admin password for server management",
+                    "default": ""
+                },
+                "maxPlayers": {
+                    "type": "number",
+                    "description": "Maximum number of players allowed on the server",
+                    "default": 60,
+                    "minimum": 1,
+                    "maximum": 100
+                },
+                "verifySignatures": {
+                    "type": "number",
+                    "description": "Verify mod signatures (0=disabled, 1=enabled, 2=weak)",
+                    "default": 2,
+                    "enum": [0, 1, 2]
+                },
+                "forceSameBuild": {
+                    "type": "number",
+                    "description": "Force clients to use the same game version",
+                    "default": 1,
+                    "enum": [0, 1]
+                },
+                "disableVoN": {
+                    "type": "number",
+                    "description": "Disable voice over network",
+                    "default": 0,
+                    "enum": [0, 1]
+                },
+                "vonCodecQuality": {
+                    "type": "number",
+                    "description": "Voice codec quality (0-20)",
+                    "default": 7,
+                    "minimum": 0,
+                    "maximum": 20
+                },
+                "disable3rdPerson": {
+                    "type": "number",
+                    "description": "Disable third person view",
+                    "default": 0,
+                    "enum": [0, 1]
+                },
+                "disableCrosshair": {
+                    "type": "number",
+                    "description": "Disable crosshair",
+                    "default": 0,
+                    "enum": [0, 1]
+                },
+                "serverTime": {
+                    "type": "string",
+                    "description": "Server time setting",
+                    "default": "SystemTime"
+                },
+                "serverTimeAcceleration": {
+                    "type": "number",
+                    "description": "Time acceleration multiplier",
+                    "default": 12,
+                    "minimum": 0.1,
+                    "maximum": 64
+                },
+                "serverNightTimeAcceleration": {
+                    "type": "number",
+                    "description": "Night time acceleration multiplier",
+                    "default": 4,
+                    "minimum": 0.1,
+                    "maximum": 64
+                },
+                "serverTimePersistent": {
+                    "type": "number",
+                    "description": "Persistent server time",
+                    "default": 0,
+                    "enum": [0, 1]
+                },
+                "guaranteedUpdates": {
+                    "type": "number",
+                    "description": "Guaranteed network updates",
+                    "default": 1,
+                    "enum": [0, 1]
+                },
+                "loginQueueConcurrentPlayers": {
+                    "type": "number",
+                    "description": "Concurrent players in login queue",
+                    "default": 5,
+                    "minimum": 1,
+                    "maximum": 100
+                },
+                "loginQueueMaxPlayers": {
+                    "type": "number",
+                    "description": "Maximum players in login queue",
+                    "default": 500,
+                    "minimum": 1,
+                    "maximum": 1000
+                },
+                "instanceId": {
+                    "type": "number",
+                    "description": "Server instance ID",
+                    "default": 1,
+                    "minimum": 1
+                },
+                "storeHouseStateDisabled": {
+                    "type": "number",
+                    "description": "Disable persistent house state",
+                    "default": 0,
+                    "enum": [0, 1]
+                },
+                "storageAutoFix": {
+                    "type": "number",
+                    "description": "Auto fix storage issues",
+                    "default": 1,
+                    "enum": [0, 1]
+                }
+            }
+        }
+    }
+}

@@ -2,18 +2,23 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { LogType, LogTypeEnum, MetricType, MetricTypeEnum, MetricWrapper, ServerInfo, SystemReport, isSameServerInfo } from '../models';
 import { AuthService } from '../../auth/services/auth.service';
+import { MockDataService } from './mock-data.service';
+import { AppErrorHandlerService } from './error-handler.service';
+import { environment } from '../../../environments/environment';
+import { createLogger } from '../../../util/logger';
 import Chart from 'chart.js';
 import { BehaviorSubject, Observable, of, Subject, Subscription, timer } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
 const processError = (err: any, prefix?: string): Observable<any> => {
-    let message = '';
+    const logger = createLogger('API_ERROR');
+    
     if (err.error instanceof ErrorEvent) {
-        message = err.error.message;
+        logger.error(`${prefix ? `${prefix}: ` : ''}Client-side error: ${err.error.message}`, err);
     } else {
-        message = `Error Code: ${err.status}\nMessage: ${err.message}`;
+        logger.error(`${prefix ? `${prefix}: ` : ''}HTTP ${err.status}: ${err.message}`, err);
     }
-    console.error(`${prefix ? `${prefix}:` : ''}: ${message}`, err);
+    
     return of(null);
 };
 
@@ -32,12 +37,14 @@ export class ApiFetcher<K extends ApiFetcherTypes, T extends Timestamped> {
     public constructor(
         private httpClient: HttpClient,
         private auth: AuthService,
+        private mockService: MockDataService,
         private dataType: K,
     ) {
+        const baseUrl = environment.apiBaseUrl;
         if (Object.keys(LogTypeEnum).includes(dataType)) {
-            this.apiPath = `/api/logs`;
+            this.apiPath = `${baseUrl}/api/logs`;
         } else if (Object.keys(MetricTypeEnum).includes(dataType)) {
-            this.apiPath = `/api/metrics`;
+            this.apiPath = `${baseUrl}/api/metrics`;
         } else {
             throw new Error('Unknown data type');
         }
@@ -143,6 +150,7 @@ export class AppCommonService {
     public constructor(
         private httpClient: HttpClient,
         private auth: AuthService,
+        private mockService: MockDataService,
     ) {
         const savedRefreshRate = localStorage.getItem('DZSM_REFRESH_RATE');
         if (savedRefreshRate) {
@@ -156,6 +164,7 @@ export class AppCommonService {
                     new ApiFetcher<typeof x, any>(
                         this.httpClient,
                         this.auth,
+                        this.mockService,
                         x,
                     ),
                 );
@@ -169,6 +178,7 @@ export class AppCommonService {
                     new ApiFetcher<typeof x, any>(
                         this.httpClient,
                         this.auth,
+                        this.mockService,
                         x,
                     ),
                 );
@@ -221,9 +231,18 @@ export class AppCommonService {
         return this.auth.getAuthHeaders();
     }
 
+    private buildApiUrl(resource: string): string {
+        const baseUrl = environment.apiBaseUrl;
+        return baseUrl ? `${baseUrl}/api/${resource}` : `/api/${resource}`;
+    }
+
     public apiPOST(resource: string, body: any): Observable<string> {
+        if (environment.enableMockMode) {
+            return this.mockService.executeCommand(`POST ${resource}: ${JSON.stringify(body)}`);
+        }
+        
         return this.httpClient.post(
-            `/api/${resource}`,
+            this.buildApiUrl(resource),
             body,
             {
                 headers: this.getAuthHeaders(),
@@ -236,8 +255,12 @@ export class AppCommonService {
     }
 
     public apiGET(resource: string): Observable<string> {
+        if (environment.enableMockMode) {
+            return this.mockService.executeCommand(`GET ${resource}`);
+        }
+        
         return this.httpClient.get(
-            `/api/${resource}`,
+            this.buildApiUrl(resource),
             {
                 headers: this.getAuthHeaders(),
                 withCredentials: true,
@@ -249,8 +272,12 @@ export class AppCommonService {
     }
 
     public fetchManagerConfig(): Observable<string> {
+        if (environment.enableMockMode) {
+            return this.mockService.getFile('config.json');
+        }
+        
         return this.httpClient.get(
-            `/api/config`,
+            this.buildApiUrl('config'),
             {
                 headers: this.getAuthHeaders(),
                 withCredentials: true,
@@ -262,8 +289,12 @@ export class AppCommonService {
     }
 
     public updateManagerConfig(config: string): Observable<any> {
+        if (environment.enableMockMode) {
+            return this.mockService.saveFile('config.json', config);
+        }
+        
         return this.httpClient.post<any>(
-            `/api/updateconfig`,
+            this.buildApiUrl('updateconfig'),
             {
                 config,
             },
@@ -379,8 +410,18 @@ export class AppCommonService {
     }
 
     public fetchServerInfo(): Observable<ServerInfo> {
+        if (environment.enableMockMode) {
+            return this.mockService.getServerInfo().pipe(
+                tap((x) => {
+                    if (!isSameServerInfo(x, this.SERVER_INFO.getValue())) {
+                        this.SERVER_INFO.next(x);
+                    }
+                }),
+            );
+        }
+        
         return this.httpClient.get<ServerInfo>(
-            `/api/serverinfo`,
+            this.buildApiUrl('serverinfo'),
             {
                 headers: this.getAuthHeaders(),
                 withCredentials: true,

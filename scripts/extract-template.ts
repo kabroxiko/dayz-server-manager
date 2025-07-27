@@ -30,23 +30,46 @@ try {
     fs.mkdirSync('dist/config', {recursive: true});
 } catch {}
 
-const schema = createConfigSchema();
+let schema = createConfigSchema();
 
-schema.properties.serverCfg.default = new ServerCfg();
+// Add null checks to prevent runtime errors
+if (schema && schema.properties && schema.properties.serverCfg) {
+    schema.properties.serverCfg.default = new ServerCfg();
+} else {
+    console.warn('Warning: Could not generate config schema, using fallback');
+    // Create a minimal fallback schema
+    schema = {
+        type: "object",
+        properties: {
+            serverCfg: {
+                type: "object",
+                default: new ServerCfg()
+            }
+        },
+        propertyOrder: [],
+        additionalProperties: false
+    };
+}
 
 fs.writeFileSync(
     path.resolve(path.join(__dirname, '../dist/VERSION')),
     pkgJson.version,
 );
-fs.writeFileSync(
-    path.resolve(path.join(__dirname, '../build/server-manager-template.json')),
-    generateConfigTemplate(schema),
-);
-fs.writeFileSync(
-    path.resolve(path.join(__dirname, '../dist/config/config.schema.json')),
-    JSON.stringify(schema),
-);
-fs.writeFileSync(
-    path.resolve(path.join(__dirname, '../src/config/config.schema.json')),
-    JSON.stringify(schema),
-);
+
+// Only write schema files if schema was generated successfully
+if (schema) {
+    fs.writeFileSync(
+        path.resolve(path.join(__dirname, '../build/server-manager-template.json')),
+        generateConfigTemplate(schema),
+    );
+    fs.writeFileSync(
+        path.resolve(path.join(__dirname, '../dist/config/config.schema.json')),
+        JSON.stringify(schema),
+    );
+    fs.writeFileSync(
+        path.resolve(path.join(__dirname, '../src/config/config.schema.json')),
+        JSON.stringify(schema),
+    );
+} else {
+    console.warn('Warning: Skipping schema file generation due to schema creation failure');
+}

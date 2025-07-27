@@ -1,0 +1,504 @@
+<div class="row">
+    <div class="col-12">
+        <h1>Server Settings</h1>
+        <p class="text-muted">Configure your DayZ server settings across multiple categories.</p>
+    </div>
+</div>
+
+<div class="row" *ngIf="loading">
+    <div class="col-12 text-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading settings...</p>
+    </div>
+</div>
+
+<div class="row" *ngIf="!loading">
+    <div class="col-12">
+        <!-- Settings Navigation Tabs -->
+        <ul class="nav nav-tabs nav-fill mb-4" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" [class.active]="activeTab === 'basic'" (click)="setActiveTab('basic')" type="button">
+          <i class="bi bi-gear"></i> Basic
+        </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" [class.active]="activeTab === 'security'" (click)="setActiveTab('security')" type="button">
+          <i class="bi bi-shield-check"></i> Security
+        </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" [class.active]="activeTab === 'performance'" (click)="setActiveTab('performance')" type="button">
+          <i class="bi bi-cpu"></i> Performance
+        </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" [class.active]="activeTab === 'gameplay'" (click)="setActiveTab('gameplay')" type="button">
+          <i class="bi bi-controller"></i> Gameplay
+        </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" [class.active]="activeTab === 'mods'" (click)="setActiveTab('mods')" type="button">
+          <i class="bi bi-puzzle"></i> Mods
+        </button>
+            </li>
+        </ul>
+
+        <!-- Settings Form -->
+        <form [formGroup]="settingsForm" (ngSubmit)="onSubmit()">
+
+            <!-- Basic Settings Tab -->
+            <div class="tab-content" *ngIf="activeTab === 'basic'">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Basic Server Configuration</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="hostname" class="form-label">Server Name</label>
+                                    <input type="text" class="form-control" id="hostname" formControlName="hostname" [class.is-invalid]="isFieldInvalid('hostname')">
+                                    <div class="invalid-feedback">{{ getFieldError('hostname') }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="maxPlayers" class="form-label">Max Players</label>
+                                    <input type="number" class="form-control" id="maxPlayers" formControlName="maxPlayers" min="1" max="100" [class.is-invalid]="isFieldInvalid('maxPlayers')">
+                                    <div class="invalid-feedback">{{ getFieldError('maxPlayers') }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Server Password</label>
+                                    <input type="password" class="form-control" id="password" formControlName="password">
+                                    <div class="form-text">Leave blank for no password</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="passwordAdmin" class="form-label">Admin Password</label>
+                                    <input type="password" class="form-control" id="passwordAdmin" formControlName="passwordAdmin" [class.is-invalid]="isFieldInvalid('passwordAdmin')">
+                                    <div class="invalid-feedback">{{ getFieldError('passwordAdmin') }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="serverTimeAcceleration" class="form-label">Time Acceleration</label>
+                                    <input type="number" class="form-control" id="serverTimeAcceleration" formControlName="serverTimeAcceleration" step="0.1" min="0.1" max="24" [class.is-invalid]="isFieldInvalid('serverTimeAcceleration')">
+                                    <div class="form-text">1.0 = normal speed, 2.0 = 2x faster</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="serverNightTimeAcceleration" class="form-label">Night Time Acceleration</label>
+                                    <input type="number" class="form-control" id="serverNightTimeAcceleration" formControlName="serverNightTimeAcceleration" step="0.1" min="0.1" max="24" [class.is-invalid]="isFieldInvalid('serverNightTimeAcceleration')">
+                                    <div class="form-text">Higher value = shorter nights</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check mt-4 pt-2">
+                                    <input class="form-check-input" type="checkbox" id="serverTimePersistent" formControlName="serverTimePersistent">
+                                    <label class="form-check-label" for="serverTimePersistent">
+                    Persistent Time
+                  </label>
+                                    <div class="form-text">Time continues when server is offline</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="instanceId" class="form-label">Instance ID</label>
+                                    <input type="number" class="form-control" id="instanceId" formControlName="instanceId" min="1" max="100" [class.is-invalid]="isFieldInvalid('instanceId')">
+                                    <div class="form-text">Unique identifier for this server instance</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="loginQueueConcurrentPlayers" class="form-label">Concurrent Logins</label>
+                                    <input type="number" class="form-control" id="loginQueueConcurrentPlayers" formControlName="loginQueueConcurrentPlayers" min="1" max="20" [class.is-invalid]="isFieldInvalid('loginQueueConcurrentPlayers')">
+                                    <div class="form-text">Players connecting simultaneously</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="loginQueueMaxPlayers" class="form-label">Max Queue Size</label>
+                                    <input type="number" class="form-control" id="loginQueueMaxPlayers" formControlName="loginQueueMaxPlayers" min="10" max="1000" [class.is-invalid]="isFieldInvalid('loginQueueMaxPlayers')">
+                                    <div class="form-text">Maximum players in login queue</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Settings Tab -->
+            <div class="tab-content" *ngIf="activeTab === 'security'">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Security & Anti-Cheat Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="verifySignatures" class="form-label">Verify Signatures</label>
+                                    <select class="form-select" id="verifySignatures" formControlName="verifySignatures">
+                    <option *ngFor="let option of verifySignatureOptions" [value]="option.value">
+                      {{ option.label }}
+                    </option>
+                  </select>
+                                    <div class="form-text">Controls addon signature verification</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="vonCodecQuality" class="form-label">Voice Codec Quality</label>
+                                    <select class="form-select" id="vonCodecQuality" formControlName="vonCodecQuality">
+                    <option *ngFor="let option of vonCodecQualityOptions" [value]="option.value">
+                      {{ option.label }}
+                    </option>
+                  </select>
+                                    <div class="form-text">Voice over network quality setting</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="forceSameBuild" formControlName="forceSameBuild">
+                                    <label class="form-check-label" for="forceSameBuild">
+                    Force Same Build
+                  </label>
+                                    <div class="form-text">Require exact client version</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="disableVoN" formControlName="disableVoN">
+                                    <label class="form-check-label" for="disableVoN">
+                    Disable Voice Chat
+                  </label>
+                                    <div class="form-text">Turn off voice over network</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="disable3rdPerson" formControlName="disable3rdPerson">
+                                    <label class="form-check-label" for="disable3rdPerson">
+                    Disable 3rd Person
+                  </label>
+                                    <div class="form-text">Force first person only</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="disableCrosshair" formControlName="disableCrosshair">
+                                    <label class="form-check-label" for="disableCrosshair">
+                    Disable Crosshair
+                  </label>
+                                    <div class="form-text">Remove crosshair overlay</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="disablePersonalLight" formControlName="disablePersonalLight">
+                                    <label class="form-check-label" for="disablePersonalLight">
+                    Disable Personal Light
+                  </label>
+                                    <div class="form-text">Remove player flashlight</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="enableWhitelist" formControlName="enableWhitelist">
+                                    <label class="form-check-label" for="enableWhitelist">
+                    Enable Whitelist
+                  </label>
+                                    <div class="form-text">Restrict access to approved players</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="lightingConfig" formControlName="lightingConfig">
+                                    <label class="form-check-label" for="lightingConfig">
+                    Enhanced Lighting
+                  </label>
+                                    <div class="form-text">Improved lighting calculations</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Settings Tab -->
+            <div class="tab-content" *ngIf="activeTab === 'performance'">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Performance & System Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="cpuCount" class="form-label">CPU Cores</label>
+                                    <input type="number" class="form-control" id="cpuCount" formControlName="cpuCount" min="1" max="32" [class.is-invalid]="isFieldInvalid('cpuCount')">
+                                    <div class="form-text">Number of CPU cores to use</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="memoryAllocator" class="form-label">Memory Allocator</label>
+                                    <select class="form-select" id="memoryAllocator" formControlName="memoryAllocator">
+                    <option *ngFor="let allocator of memoryAllocators" [value]="allocator">
+                      {{ allocator }}
+                    </option>
+                  </select>
+                                    <div class="form-text">Memory management system</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="limitFPS" class="form-label">FPS Limit</label>
+                                    <input type="number" class="form-control" id="limitFPS" formControlName="limitFPS" min="30" max="300" [class.is-invalid]="isFieldInvalid('limitFPS')">
+                                    <div class="form-text">Maximum server FPS</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="enableHyperThreading" formControlName="enableHyperThreading">
+                                    <label class="form-check-label" for="enableHyperThreading">
+                    Enable Hyper-Threading
+                  </label>
+                                    <div class="form-text">Use logical CPU cores</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="scriptDebug" formControlName="scriptDebug">
+                                    <label class="form-check-label" for="scriptDebug">
+                    Script Debug
+                  </label>
+                                    <div class="form-text">Enable script debugging</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="adminLog" formControlName="adminLog">
+                                    <label class="form-check-label" for="adminLog">
+                    Admin Logging
+                  </label>
+                                    <div class="form-text">Log admin actions</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="netLog" formControlName="netLog">
+                                    <label class="form-check-label" for="netLog">
+                    Network Logging
+                  </label>
+                                    <div class="form-text">Log network events</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="freezeDetection" formControlName="freezeDetection">
+                                    <label class="form-check-label" for="freezeDetection">
+                    Freeze Detection
+                  </label>
+                                    <div class="form-text">Monitor for server freezes</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="storageAutoFix" formControlName="storageAutoFix">
+                                    <label class="form-check-label" for="storageAutoFix">
+                    Storage Auto-Fix
+                  </label>
+                                    <div class="form-text">Automatically repair storage issues</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gameplay Settings Tab -->
+            <div class="tab-content" *ngIf="activeTab === 'gameplay'">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Gameplay & Connection Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- MOTD Section -->
+                        <div class="mb-4">
+                            <h6>Message of the Day (MOTD)</h6>
+                            <div *ngFor="let motdControl of motdArray.controls; let i = index" class="mb-2">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" [formControl]="$any(motdControl)" placeholder="Enter MOTD line...">
+                                    <button class="btn btn-outline-danger" type="button" (click)="removeMotdLine(i)" [disabled]="motdArray.length === 1">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary btn-sm" (click)="addMotdLine()">
+                <i class="bi bi-plus"></i> Add MOTD Line
+              </button>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="motdInterval" class="form-label">MOTD Interval (seconds)</label>
+                                    <input type="number" class="form-control" id="motdInterval" formControlName="motdInterval" min="1" max="300" [class.is-invalid]="isFieldInvalid('motdInterval')">
+                                    <div class="form-text">How often to display MOTD</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="timeStampFormat" class="form-label">Timestamp Format</label>
+                                    <select class="form-select" id="timeStampFormat" formControlName="timeStampFormat">
+                    <option *ngFor="let format of timeStampFormats" [value]="format">
+                      {{ format }}
+                    </option>
+                  </select>
+                                    <div class="form-text">Log timestamp format</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="maxPing" class="form-label">Max Ping (ms)</label>
+                                    <input type="number" class="form-control" id="maxPing" formControlName="maxPing" min="50" max="1000" [class.is-invalid]="isFieldInvalid('maxPing')">
+                                    <div class="form-text">Kick players with higher ping</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="maxDesync" class="form-label">Max Desync (ms)</label>
+                                    <input type="number" class="form-control" id="maxDesync" formControlName="maxDesync" min="50" max="500" [class.is-invalid]="isFieldInvalid('maxDesync')">
+                                    <div class="form-text">Kick players with high desync</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="maxPacketLoss" class="form-label">Max Packet Loss (%)</label>
+                                    <input type="number" class="form-control" id="maxPacketLoss" formControlName="maxPacketLoss" min="10" max="100" [class.is-invalid]="isFieldInvalid('maxPacketLoss')">
+                                    <div class="form-text">Kick players with high packet loss</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mods Settings Tab -->
+            <div class="tab-content" *ngIf="activeTab === 'mods'">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">Client Mods</h6>
+                                <small class="text-muted">Mods that clients need to download</small>
+                            </div>
+                            <div class="card-body">
+                                <div *ngFor="let modControl of modsArray.controls; let i = index" class="mb-2">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" [formControl]="$any(modControl)" placeholder="Workshop ID or @ModName" [class.is-invalid]="modControl.invalid && modControl.touched">
+                                        <button class="btn btn-outline-danger" type="button" (click)="removeMod(i)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                                    </div>
+                                    <div class="invalid-feedback" *ngIf="modControl.invalid && modControl.touched">
+                                        Enter a 10-digit Workshop ID or @ModName
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-outline-primary btn-sm" (click)="addMod()">
+                  <i class="bi bi-plus"></i> Add Client Mod
+                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">Server Mods</h6>
+                                <small class="text-muted">Server-side only mods</small>
+                            </div>
+                            <div class="card-body">
+                                <div *ngFor="let serverModControl of serverModsArray.controls; let i = index" class="mb-2">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" [formControl]="$any(serverModControl)" placeholder="Workshop ID or @ModName" [class.is-invalid]="serverModControl.invalid && serverModControl.touched">
+                                        <button class="btn btn-outline-danger" type="button" (click)="removeServerMod(i)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                                    </div>
+                                    <div class="invalid-feedback" *ngIf="serverModControl.invalid && serverModControl.touched">
+                                        Enter a 10-digit Workshop ID or @ModName
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-outline-primary btn-sm" (click)="addServerMod()">
+                  <i class="bi bi-plus"></i> Add Server Mod
+                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-3">
+                    <h6><i class="bi bi-info-circle"></i> Mod Configuration Tips</h6>
+                    <ul class="mb-0">
+                        <li><strong>Workshop IDs:</strong> Use 10-digit numbers from Steam Workshop URLs</li>
+                        <li><strong>Local Mods:</strong> Use @ModName format for local modifications</li>
+                        <li><strong>Load Order:</strong> Mods load in the order listed (drag to reorder)</li>
+                        <li><strong>Server Mods:</strong> Only loaded on server, not required by clients</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <div class="text-muted">
+                    <small>
+            <i class="bi bi-info-circle"></i> 
+            Changes require server restart to take effect
+          </small>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-outline-warning me-2" (click)="resetForm()" [disabled]="saving">
+            <i class="bi bi-arrow-clockwise"></i> Reset
+          </button>
+                    <button type="submit" class="btn btn-primary" [disabled]="!settingsForm.valid || saving">
+            <span class="spinner-border spinner-border-sm me-2" *ngIf="saving"></span>
+            <i class="bi bi-save" *ngIf="!saving"></i>
+            {{ saving ? 'Saving...' : 'Save Settings' }}
+          </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

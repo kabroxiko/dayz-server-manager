@@ -3,6 +3,7 @@ import { MetricTypeEnum, MetricWrapper, SystemReport } from '../../app-common/mo
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AppCommonService } from '../../app-common/services/app-common.service';
+import { createLogger } from '../../../util/logger';
 
 @Component({
     selector: 'sb-dashboard',
@@ -12,6 +13,7 @@ import { AppCommonService } from '../../app-common/services/app-common.service';
 export class DashboardComponent implements OnInit, OnDestroy {
 
     private componentDestroy: Subject<void> | undefined = new Subject();
+    private readonly logger = createLogger('DASHBOARD');
 
     public systemMetrics: MetricWrapper<SystemReport>[] = [];
 
@@ -39,9 +41,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 (next) => {
                     if (next) {
                         this.systemMetrics = next;
+                        this.logger.debug('System metrics updated', { count: next.length });
                     }
                 },
-                console.error,
+                (error) => {
+                    this.logger.error('Failed to load system metrics', error);
+                },
             );
     }
 

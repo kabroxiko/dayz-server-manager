@@ -1,0 +1,95 @@
+<div class="row">
+    <div class="col-12">
+        <h1>Server Dashboard</h1>
+    </div>
+</div>
+
+<div class="row" *ngIf="loading">
+    <div class="col-12 text-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading server information...</p>
+    </div>
+</div>
+
+<div class="row" *ngIf="!loading && serverInfo">
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Server Status</h5>
+                <h3 class="text-success" *ngIf="serverInfo.status === 'online'">
+                    <i class="bi bi-check-circle"></i> Online
+                </h3>
+                <h3 class="text-danger" *ngIf="serverInfo.status === 'offline'">
+                    <i class="bi bi-x-circle"></i> Offline
+                </h3>
+                <h3 class="text-warning" *ngIf="serverInfo.status === 'starting'">
+                    <i class="bi bi-hourglass"></i> Starting
+                </h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Players</h5>
+                <h3>{{ serverInfo.players.current }} / {{ serverInfo.players.max }}</h3>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" [style.width.%]="(serverInfo.players.current / serverInfo.players.max) * 100">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Uptime</h5>
+                <h3>{{ serverInfo.uptime }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Map</h5>
+                <h3>{{ serverInfo.map }}</h3>
+                <small class="text-muted">Version: {{ serverInfo.version }}</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" *ngIf="!loading && serverInfo">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Server Information</h5>
+            </div>
+            <div class="card-body">
+                <h6><strong>Server Name:</strong> {{ serverInfo.name }}</h6>
+                <p class="mb-0">
+                    The server is currently <span class="badge bg-success" *ngIf="serverInfo.status === 'online'">online</span>
+                    <span class="badge bg-danger" *ngIf="serverInfo.status === 'offline'">offline</span> and running DayZ version {{ serverInfo.version }} on {{ serverInfo.map }}.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4" *ngIf="!loading && !serverInfo">
+    <div class="col-12">
+        <div class="alert alert-warning" role="alert">
+            <h4 class="alert-heading">Unable to connect to server</h4>
+            <p>Could not retrieve server information. The server may be offline or there may be a connection issue.</p>
+            <hr>
+            <button class="btn btn-outline-warning" (click)="loadServerInfo()">
+        Try Again
+      </button>
+        </div>
+    </div>
+</div>

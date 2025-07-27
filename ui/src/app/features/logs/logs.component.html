@@ -1,0 +1,39 @@
+<div class="row">
+    <div class="col-12">
+        <h1>Server Logs</h1>
+    </div>
+</div>
+
+<div class="row" *ngIf="loading">
+    <div class="col-12 text-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading logs...</p>
+    </div>
+</div>
+
+<div class="row" *ngIf="!loading">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Recent Logs ({{ logs.length }} entries)</h5>
+                <button class="btn btn-outline-primary btn-sm" (click)="loadLogs()">
+          Refresh
+        </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="log-container" *ngIf="logs.length > 0">
+                    <div class="log-entry" *ngFor="let log of logs">
+                        {{ log }}
+                    </div>
+                </div>
+
+                <div class="p-4 text-center text-muted" *ngIf="logs.length === 0">
+                    <h5>No logs available</h5>
+                    <p>There are currently no log entries to display.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
