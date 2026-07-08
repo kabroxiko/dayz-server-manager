@@ -9,6 +9,7 @@ import { Monitor } from '../services/monitor';
 import { SystemReporter } from '../services/system-reporter';
 import { RCON } from '../services/rcon';
 import { SteamCMD } from '../services/steamcmd';
+import { DayzopsClient } from '../services/dayzops-client';
 import { CommandMap, Request, RequestTemplate, Response, ResponsePartHandler } from '../types/interface';
 import { IService } from '../types/service';
 import { LogLevel } from '../util/logger';
@@ -42,6 +43,7 @@ export class Interface extends IService {
         private backup: Backups,
         private missionFiles: MissionFiles,
         private configFileHelper: ConfigFileHelper,
+        private dayzopsClient: DayzopsClient,
     ) {
         super(loggerFactory.createLogger('Manager'));
         this.setupCommandMap();
@@ -373,6 +375,46 @@ export class Interface extends IService {
                 level: 'view',
                 disableDiscord: true,
                 action: () => this.manager.getServerInfo(),
+            })],
+            ['ops.update', RequestTemplate.build({
+                method: 'post',
+                level: 'manage',
+                params: [{ name: 'configPath' }],
+                disableDiscord: true,
+                action: (req, params) => {
+                    const cfgPath = params.configPath || this.configFileHelper.getConfigFilePath();
+                    return this.dayzopsClient.update(cfgPath);
+                },
+            })],
+            ['ops.apply', RequestTemplate.build({
+                method: 'post',
+                level: 'manage',
+                params: [{ name: 'configPath' }],
+                disableDiscord: true,
+                action: (req, params) => {
+                    const cfgPath = params.configPath || this.configFileHelper.getConfigFilePath();
+                    return this.dayzopsClient.apply(cfgPath);
+                },
+            })],
+            ['ops.rollback', RequestTemplate.build({
+                method: 'post',
+                level: 'admin',
+                params: [{ name: 'configPath', optional: true }],
+                disableDiscord: true,
+                action: (req, params) => {
+                    const cfgPath = params.configPath || this.configFileHelper.getConfigFilePath();
+                    return this.dayzopsClient.rollback(cfgPath);
+                },
+            })],
+            ['ops.prune', RequestTemplate.build({
+                method: 'post',
+                level: 'manage',
+                params: [{ name: 'configPath' }],
+                disableDiscord: true,
+                action: (req, params) => {
+                    const cfgPath = params.configPath || this.configFileHelper.getConfigFilePath();
+                    return this.dayzopsClient.prune(cfgPath);
+                },
             })],
         ]);
     }
