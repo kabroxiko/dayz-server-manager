@@ -297,7 +297,15 @@ export class Interface extends IService {
                 method: 'post',
                 level: 'manage',
                 noResponse: true,
-                action: () => this.backup.createBackup(),
+                action: () => {
+                    // prefer dayzops if configured
+                    try {
+                        const cfgPath = this.configFileHelper.getConfigFilePath();
+                        return this.dayzopsClient.backup(cfgPath);
+                    } catch (e) {
+                        return this.backup.createBackup();
+                    }
+                },
             })],
             ['getbackups', RequestTemplate.build({
                 method: 'get',

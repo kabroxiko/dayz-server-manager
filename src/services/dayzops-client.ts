@@ -48,4 +48,17 @@ export class DayzopsClient {
     public async prune(configPath: string) {
         return this.post('/prune', { path: configPath });
     }
+    public async backup(configPath: string) {
+        return this.post('/backup', { path: configPath });
+    }
+
+    public async listBackups(configPath: string) {
+        const url = `${this.cfg.baseUrl}/backups?path=${encodeURIComponent(configPath)}`;
+        const resp = await fetch(url);
+        if (!resp.ok) {
+            const text = await resp.text();
+            throw new Error(`dayzops API error: ${resp.status} ${text}`);
+        }
+        return resp.json();
+    }
 }
